@@ -1,12 +1,15 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: '2024-11-04',
   devtools: { enabled: true },
+  
+  modules: ['@nuxtjs/tailwindcss'],
+  
   runtimeConfig: {
     public: {
-      wpGraphQLEndpoint: 'http://headless-wp.local/graphql' // proxied to WP backend
+      wpGraphQLEndpoint: 'http://headless-wp.local/graphql'
     }
   },
+  
   routeRules: {
     '/': { isr: { expiration: 120}}
   }

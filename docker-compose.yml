@@ -1,0 +1,86 @@
+services:
+  db:
+    image: mariadb:11
+    command: --transaction-isolation=READ-COMMITTED --innodb-buffer-pool-size=256M
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wpuser
+      MARIADB_PASSWORD: wppass
+      MARIADB_ROOT_PASSWORD: devroot
+      TZ: America/Toronto
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  wordpress:
+    image: wordpress:6.6.2-php8.3-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'http://localhost:8080');
+        define('WP_SITEURL', 'http://localhost:8080');
+        define('WP_DEBUG', true);
+        define('DISALLOW_FILE_EDIT', true);
+    volumes:
+      - wp_data:/var/www/html/wp-content
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/wp-login.php || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  nuxt:
+    build:
+      context: ./nuxt
+      dockerfile: Dockerfile
+      target: deps  # Stop at deps stage
+    command: npm run dev  # Override CMD with dev command
+    environment:
+      NITRO_PORT: 3000
+      NUXT_PUBLIC_SITE_URL: http://localhost:8080
+      HOST: 0.0.0.0  # Important for Docker
+    volumes:
+      - ./nuxt:/app  # Mount source code for hot reload
+      - /app/node_modules  # Prevent overwriting node_modules
+    expose:
+      - "3000"
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://0.0.0.0:3000 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  proxy:
+    image: nginx:1.27-alpine
+    depends_on:
+      nuxt:
+        condition: service_healthy
+      wordpress:
+        condition: service_healthy
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:
+  wp_data:
