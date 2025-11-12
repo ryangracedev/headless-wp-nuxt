@@ -1,5 +1,30 @@
 <template>
   <div class="min-h-screen bg-white">
+    <!-- Demo Navigation Bar -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            <span class="font-semibold text-sm">Headless WordPress + Nuxt Demo</span>
+          </div>
+          <nav class="flex gap-4 text-sm">
+            <span class="px-3 py-1 bg-white/20 rounded-full font-medium">
+              Home (Nuxt)
+            </span>
+            <NuxtLink
+              to="/about"
+              class="px-3 py-1 hover:bg-white/20 rounded-full transition-colors font-medium"
+            >
+              About (WordPress)
+            </NuxtLink>
+          </nav>
+        </div>
+      </div>
+    </div>
+
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
