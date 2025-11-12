@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       wpGraphQLEndpoint: 'http://headless-wp.local/graphql',
-      wpApiBase: 'http://headless-wp.local/wp-json/wp/v2'
+      wpApiBase: 'http://localhost:8080/wp-json/wp/v2'
     }
   },
   
