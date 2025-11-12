@@ -33,6 +33,7 @@ services:
         define('DISALLOW_FILE_EDIT', true);
     volumes:
       - wp_data:/var/www/html/wp-content
+      - ./shared:/shared  # Shared folder accessible by both
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost/wp-login.php || exit 1"]
       interval: 15s
@@ -52,6 +53,7 @@ services:
     volumes:
       - ./nuxt:/app  # Mount source code for hot reload
       - /app/node_modules  # Prevent overwriting node_modules
+      - ./shared:/shared  # Same shared folder
     expose:
       - "3000"
     depends_on:
