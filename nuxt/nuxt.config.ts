@@ -6,11 +6,13 @@ export default defineNuxtConfig({
   
   runtimeConfig: {
     public: {
-      wpGraphQLEndpoint: 'http://headless-wp.local/graphql'
+      wpGraphQLEndpoint: 'http://headless-wp.local/graphql',
+      wpApiBase: 'http://headless-wp.local/wp-json/wp/v2'
     }
   },
   
   routeRules: {
-    '/': { isr: { expiration: 120}}
+    '/': { isr: { expiration: 120}},
+    '/about': { isr: { expiration: 120}}
   }
 })
