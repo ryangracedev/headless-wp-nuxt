@@ -8,7 +8,8 @@
     "start": "node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "sync-theme": "node scripts/syncTheme.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
