@@ -1,5 +1,17 @@
 <template>
   <div class="min-h-screen bg-white">
+    <!-- Header with indicator -->
+    <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          <span class="font-semibold">This is a custom Nuxt page – Other pages use WordPress Gutenberg</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Hero Section (combined: keeps orange gradient + adds dual CTAs) -->
     <section class="relative bg-gradient-to-br from-[#D74E3B] to-[#FF5741] text-white overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 relative z-10">
@@ -12,13 +24,13 @@
           </p>
           <div class="flex flex-wrap gap-4 animate-fade-in-delay-2">
             <a
-              href="/wp/about"
+              href="/about"
               class="inline-block bg-white text-[#5956E9] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
             >
               Learn More
             </a>
             <a
-              href="/wp/contact"
+              href="/contact"
               class="inline-block bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-all duration-300"
             >
               Get in Touch

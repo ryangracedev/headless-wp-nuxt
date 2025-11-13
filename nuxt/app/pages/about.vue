@@ -26,15 +26,18 @@
     <div v-else-if="error" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div class="bg-red-50 border border-red-200 rounded-lg p-6">
         <h2 class="text-2xl font-bold text-red-900 mb-2">Error Loading Page</h2>
-        <p class="text-red-700 mb-4">{{ error.message }}</p>
+        <p class="text-red-700 mb-4">{{ error }}</p>
+        <div class="bg-gray-100 p-4 rounded mt-4">
+          <p class="text-xs text-gray-600 mb-1">Debug Info:</p>
+          <p class="text-xs font-mono">API URL: {{ config.public.wpApiBase }}</p>
+          <p class="text-xs font-mono">Trying to fetch: {{ config.public.wpApiBase }}/pages?slug=about</p>
+        </div>
         <div class="bg-yellow-50 border border-yellow-200 rounded p-4 mt-4">
-          <p class="text-sm text-yellow-800 font-semibold mb-2">Setup Instructions:</p>
+          <p class="text-sm text-yellow-800 font-semibold mb-2">Quick Fixes:</p>
           <ol class="text-sm text-yellow-800 space-y-1 list-decimal list-inside">
-            <li>Make sure WordPress is running (docker compose up)</li>
-            <li>Log into WordPress at <a href="http://localhost:8080/wp-admin" target="_blank" class="underline">localhost:8080/wp-admin</a></li>
-            <li>Create a new page called "About" with some content</li>
-            <li>Publish the page</li>
-            <li>Refresh this page</li>
+            <li>If using Docker, try changing <code class="bg-yellow-100 px-1">localhost:8080</code> to <code class="bg-yellow-100 px-1">host.docker.internal:8080</code> in nuxt.config.ts</li>
+            <li>Make sure WordPress is running: <code class="bg-yellow-100 px-1">docker compose up</code></li>
+            <li>Check if the page exists in WordPress at <a href="http://localhost:8080/wp-admin" target="_blank" class="underline">wp-admin</a></li>
           </ol>
         </div>
       </div>
@@ -43,19 +46,14 @@
     <!-- Content from WordPress -->
     <article v-else-if="data" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <!-- Page Title -->
-      <header class="mb-12 text-center">
+      <header class="mb-6 text-center">
         <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
           {{ data.title?.rendered }}
         </h1>
-        <div v-if="data.excerpt?.rendered" class="text-xl text-gray-600 max-w-2xl mx-auto">
-          <div v-html="data.excerpt.rendered" />
-        </div>
       </header>
 
-      <!-- Render Gutenberg Blocks -->
-      <div class="prose prose-lg max-w-none">
-        <BlockRenderer :content="data.content?.rendered || ''" />
-      </div>
+      <!-- Render WordPress Content Directly -->
+      <div class="wp-content prose prose-lg max-w-none" v-html="data.content?.rendered" />
     </article>
 
     <!-- Fallback if no data -->
@@ -101,25 +99,33 @@
 </template>
 
 <script setup lang="ts">
-// Fetch the About page from WordPress
-const { getPageBySlug } = useWordPress()
-const { data, pending, error } = await getPageBySlug('about')
+const config = useRuntimeConfig()
+
+// Fetch client-side only to avoid Docker networking issues
+const { data, pending, error } = await useFetch(
+  `${config.public.wpApiBase}/pages`,
+  {
+    params: {
+      slug: 'about',
+      _fields: 'id,title,content,excerpt,featured_media'
+    },
+    transform: (data: any) => Array.isArray(data) ? data[0] : null,
+    // Fetch client-side to work with Docker/localhost
+    server: false
+  }
+)
 
 // Set page metadata
 useHead({
-  title: data.value?.title?.rendered || 'About',
+  title: computed(() => data.value?.title?.rendered || 'About'),
   meta: [
     {
       name: 'description',
-      content: data.value?.excerpt?.rendered ? stripHtml(data.value.excerpt.rendered) : 'About us'
+      content: computed(() => {
+        const excerpt = data.value?.excerpt?.rendered
+        return excerpt ? excerpt.replace(/<[^>]*>/g, '').substring(0, 160) : 'About us'
+      })
     }
   ]
 })
 </script>
-
-<style scoped>
-/* Remove default styling from WordPress excerpt */
-:deep(.excerpt p) {
-  @apply mb-0;
-}
-</style>

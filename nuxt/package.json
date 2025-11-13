@@ -9,7 +9,9 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "sync-theme": "node scripts/syncTheme.js"
+    "generate:wp-blocks": "node scripts/generate-wp-blocks-css.js",
+    "sync-theme": "node scripts/syncTheme.js && npm run generate:wp-blocks",
+    "theme:sync": "npm run sync-theme"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",

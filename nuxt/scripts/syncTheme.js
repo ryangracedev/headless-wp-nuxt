@@ -106,9 +106,45 @@ function convertThemeToTailwind(themeJsonPath) {
 }
 
 function generateTailwindConfig(themeConfig) {
-  const configString = JSON.stringify(themeConfig, null, 6)
-    .replace(/"([^"]+)":/g, '$1:')
-    .replace(/"/g, "'")
+  // Helper function to format values
+  const formatValue = (value, indent = 0) => {
+    const spaces = ' '.repeat(indent)
+    
+    if (Array.isArray(value)) {
+      // Check if it's a font size array with config object
+      if (value.length === 2 && typeof value[1] === 'object') {
+        const [size, config] = value
+        const configStr = JSON.stringify(config, null, indent + 6)
+          .replace(/"/g, "'")
+          .split('\n')
+          .map((line, i) => i === 0 ? line : ' '.repeat(indent + 6) + line)
+          .join('\n')
+        return `[\n${spaces}      '${size}',\n${spaces}      ${configStr}\n${spaces}]`
+      }
+      // Regular array (like font families)
+      return '[\n' + value.map(v => `${spaces}      '${v}'`).join(',\n') + `\n${spaces}]`
+    }
+    
+    if (typeof value === 'object' && value !== null) {
+      return formatObject(value, indent + 6)
+    }
+    
+    return `'${value}'`
+  }
+  
+  // Helper function to format objects with proper key quoting
+  const formatObject = (obj, indent = 6) => {
+    const spaces = ' '.repeat(indent)
+    const entries = Object.entries(obj).map(([key, value]) => {
+      // Always quote keys (especially important for hyphenated keys like xx-small, open-sans)
+      const quotedKey = `'${key}'`
+      const formattedValue = formatValue(value, indent)
+      return `${spaces}${quotedKey}: ${formattedValue}`
+    })
+    return `{\n${entries.join(',\n')}\n${' '.repeat(indent - 6)}}`
+  }
+  
+  const formattedConfig = formatObject(themeConfig, 6)
   
   return `/** @type {import('tailwindcss').Config} */
 export default {
@@ -120,7 +156,7 @@ export default {
     "./app.vue",
   ],
   theme: {
-    extend: ${configString},
+    extend: ${formattedConfig},
   },
   plugins: [],
 }
@@ -149,7 +185,8 @@ try {
   console.log(`   Spacing: ${Object.keys(themeConfig.spacing).length} values`)
   console.log(`   Font families: ${Object.keys(themeConfig.fontFamily).length} families`)
   console.log(`   Border radius: ${Object.keys(themeConfig.borderRadius).length} sizes`)
-  console.log('\n💡 Restart your dev server to see the changes')
+  console.log('\n💡 Next step: Run "npm run generate:wp-blocks" to update WordPress block styles')
+  console.log('   Or run "npm run theme:sync" to do both steps at once')
   
 } catch (error) {
   console.error('❌ Error syncing theme:', error.message)
